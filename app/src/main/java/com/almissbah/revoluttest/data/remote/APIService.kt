@@ -6,6 +6,6 @@ import retrofit2.http.GET
 
 
 interface APIService {
-    @GET
-    fun getRandomJoke(): Observable<CurrencyRatesResponse>
+    @GET(value = "/latest?base=EUR")
+    fun getCurrencies(): Observable<CurrencyRatesResponse>
 }
