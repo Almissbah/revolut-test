@@ -1,6 +1,7 @@
 package com.almissbah.revoluttest
 
 import com.almissbah.revoluttest.di.component.AppComponent
+import com.almissbah.revoluttest.di.component.DaggerAppComponent
 import dagger.android.AndroidInjector
 import dagger.android.DaggerApplication
 

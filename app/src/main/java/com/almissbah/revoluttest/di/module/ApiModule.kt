@@ -1,5 +1,6 @@
 package com.almissbah.revoluttest.di.module
 
+import com.almissbah.revoluttest.data.Repository
 import com.almissbah.revoluttest.data.remote.APIService
 import com.almissbah.revoluttest.utils.BASE_URL
 import com.google.gson.Gson
@@ -18,13 +19,6 @@ object ApiModule {
     @Provides
     @Reusable
     @JvmStatic
-    internal fun providePostApi(retrofit: Retrofit): APIService {
-        return retrofit.create(APIService::class.java)
-    }
-
-    @Provides
-    @Reusable
-    @JvmStatic
     internal fun provideGson(): Gson {
         val gsonBuilder = GsonBuilder()
         return gsonBuilder.create()
@@ -39,5 +33,20 @@ object ApiModule {
             .addConverterFactory(GsonConverterFactory.create(gson))
             .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io()))
             .build()
+    }
+
+    @Provides
+    @Reusable
+    @JvmStatic
+    internal fun provideApiService(retrofit: Retrofit): APIService {
+        return retrofit.create(APIService::class.java)
+    }
+
+
+    @Provides
+    @Reusable
+    @JvmStatic
+    internal fun provideRepository(apiService: APIService): Repository {
+        return Repository(apiService)
     }
 }

@@ -1,20 +1,25 @@
 package com.almissbah.revoluttest.ui.main
 
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import com.almissbah.revoluttest.R
+import com.almissbah.revoluttest.data.Repository
+import com.almissbah.revoluttest.ui.BaseFragment
+import javax.inject.Inject
 
-class CurrenciesFragment : Fragment() {
+class CurrenciesFragment : BaseFragment() {
 
     companion object {
         fun newInstance() = CurrenciesFragment()
     }
 
     private lateinit var viewModel: CurrenciesViewModel
+    @Inject
+    lateinit var repository: Repository
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -26,7 +31,8 @@ class CurrenciesFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(this).get(CurrenciesViewModel::class.java)
-        // TODO: Use the ViewModel
+        viewModel.repository = this.repository
+        viewModel.subscribe()
     }
 
 }
