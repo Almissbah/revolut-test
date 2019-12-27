@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="10dp">
+        android:padding="@dimen/default_padding">
 
         <TextView
             android:id="@+id/currencyName"
@@ -23,8 +23,9 @@
             android:layout_marginStart="32dp"
             android:layout_weight="1"
             android:text="@{currency.name}"
+            android:textSize="@dimen/currency_name_text_size"
             android:textColor="@android:color/black"
-            android:textSize="18sp"
+            tools:text="USD"
             app:layout_constraintBottom_toBottomOf="@+id/value"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -35,15 +36,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_weight="1"
             android:gravity="center"
+            android:imeOptions="actionDone"
             android:inputType="numberDecimal"
-            android:padding="10dp"
+            android:padding="@dimen/default_padding"
             android:text="@{currency.valueToString}"
-            android:textSize="24sp"
+            android:textSize="@dimen/currency_value_text_size"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.807"
             app:layout_constraintStart_toEndOf="@+id/currencyName"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="1.1" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
