@@ -19,7 +19,7 @@ import com.almissbah.revoluttest.utils.DiffUtilsCallback
 class CurrenciesAdapter :
     RecyclerView.Adapter<CurrenciesAdapter.CurrencyViewHolder>() {
 
-    var currenciesList: MutableList<Currency> = mutableListOf()
+    private var currenciesList: MutableList<Currency> = mutableListOf()
     var baseCurrency: Currency? = null
     lateinit var itemClickListener: ItemClickListener
     lateinit var textChangeListener: TextChangeListener
@@ -33,6 +33,7 @@ class CurrenciesAdapter :
 
         return CurrencyViewHolder(binding)
     }
+
 
     override fun getItemCount(): Int {
         return currenciesList.size
@@ -48,23 +49,21 @@ class CurrenciesAdapter :
             onBindViewHolder(holder, position)
         } else {
             val currency = payloads[0] as Currency
-            currenciesList[position] = currency
-            holder.binding.currencyName.text = currency.name
-            if (baseCurrency != currency)
-                holder.binding.value.setText(currency.value.toString())
+            updateItemView(holder, position, currency)
         }
     }
 
+
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onBindViewHolder(holder: CurrencyViewHolder, position: Int) {
-        val currency: Currency = currenciesList[position]
+        val currency: Currency = currenciesList[holder.adapterPosition]
         holder.binding.currency = currency
         holder.binding.value.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_UP -> {
                     itemClickListener.onClicked(
                         holder.binding.value,
-                        currency,
+                        currenciesList[holder.adapterPosition],
                         holder.adapterPosition
                     )
                 }
@@ -72,9 +71,12 @@ class CurrenciesAdapter :
             false
         }
 
-        holder.itemView.setOnClickListener { v ->
-            itemClickListener.onClicked(holder.binding.value, currency, holder.adapterPosition)
-
+        holder.itemView.setOnClickListener {
+            itemClickListener.onClicked(
+                holder.binding.value,
+                currenciesList[holder.adapterPosition],
+                holder.adapterPosition
+            )
         }
     }
 
@@ -86,6 +88,13 @@ class CurrenciesAdapter :
         diffResult.dispatchUpdatesTo(this)
     }
 
+    private fun updateItemView(holder: CurrencyViewHolder, position: Int, currency: Currency) {
+        currenciesList[position].value = currency.value
+        currenciesList[position].rate = currency.rate
+        holder.binding.currencyName.text = currency.name
+        if (baseCurrency != currency)
+            holder.binding.value.setText(currency.value.toString())
+    }
 
     class CurrencyViewHolder(itemBinding: CurrenciesListItemBinding) :
         RecyclerView.ViewHolder(itemBinding.root) {

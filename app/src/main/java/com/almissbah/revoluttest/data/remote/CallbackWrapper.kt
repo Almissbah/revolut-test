@@ -9,7 +9,6 @@ abstract class CallbackWrapper<T> :
     override fun onNext(t: T) {
         onSuccess(t)
     }
-
     override fun onError(e: Throwable) {
         Log.d(CallbackWrapper::class.java.simpleName, e.toString())
     }
