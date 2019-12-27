@@ -7,7 +7,7 @@
 
         <variable
             name="currency"
-            type="com.almissbah.revoluttest.data.remote.model.Currency" />
+            type="com.almissbah.revotest.data.remote.model.Currency" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
