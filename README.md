@@ -1,5 +1,5 @@
 # Revolut Test
-one screen test app for revolut interview, the screen has a list of currencies from the endpoint (one per row) fetched every 1 sec.
+  Test app with one screen for revolut interview, the screen has a list of currencies fetched from the endpoint every 1 sec.
 
 
 ## App Features
@@ -32,7 +32,7 @@ Based on mvvm architecture and repository pattern.
 * MVVM Architecture.
 * Android Architecture Components (LiveData, Lifecycle, ViewModel, ConstraintLayout)
 * Dagger 2 for dependency injection.
-* RxJava for making calles every x sec.
+* RxJava for making API calls every x sec.
 * Retrofit 2 for API integration.
 * Gson for serialisation.
 
