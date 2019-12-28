@@ -27,9 +27,9 @@ Based on mvvm architecture and repository pattern.
 
 
 ### App Specs
-* Minimum SDK 19
-* Kotlin
-* MVVM Architecture
+* Minimum SDK 19.
+* Kotlin.
+* MVVM Architecture.
 * Android Architecture Components (LiveData, Lifecycle, ViewModel, ConstraintLayout)
 * Dagger 2 for dependency injection.
 * RxJava for making calles every x sec.
