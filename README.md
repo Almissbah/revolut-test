@@ -20,7 +20,7 @@ Based on mvvm architecture and repository pattern.
 ### App Packages:
 * **data** - contains:
   * **RevoRepository** -  app repository class for handling data.
-  * **remote** - contains the api classes needed make api calls to Revolut server, using Retrofit.
+  * **remote** - contains the api classes needed for making calls to Revolut server, using Retrofit.
 * **di** - contains dependency injection classes, using Dagger2.
 * **ui** - contains classes needed to display Activity and Fragment.
 * **util** - contains app constants and diffUtilsCallback for recycler view optimization.
