@@ -2,6 +2,7 @@ package com.almissbah.revotest.utils
 
 import com.almissbah.revotest.data.remote.model.CurrenciesApiResponse
 import com.almissbah.revotest.data.remote.model.Currency
+import com.google.gson.Gson
 
 class CurrencyListUtils {
     companion object {
@@ -15,7 +16,26 @@ class CurrencyListUtils {
             return userInput / (currency?.rate ?: 1.0)
         }
 
-        fun getValidateBaseCurrency(
+        fun parseResponseFromJson(jsonString: String): CurrenciesApiResponse? {
+            return Gson().fromJson<CurrenciesApiResponse>(
+                jsonString,
+                CurrenciesApiResponse::class.java
+            )
+        }
+
+        fun generateListFromResponse(response: CurrenciesApiResponse): MutableList<Currency> {
+            val tempList = mutableListOf<Currency>()
+            val dataSet = response.rates.entries
+            val currency = Currency(response.base, BASE_RATE) // Base currency
+            tempList.add(currency)
+            dataSet.iterator().forEach { jsonEntry ->
+                val newCurrency = Currency(jsonEntry.key, jsonEntry.value)
+                tempList.add(newCurrency)
+            }
+            return tempList
+        }
+
+        fun getValidBaseCurrency(
             baseValue: Double,
             baseCurrency: Currency?,
             currencies: MutableList<Currency>
@@ -31,7 +51,7 @@ class CurrencyListUtils {
                     currency = currencies.first()
                 }
             }
-            return currency;
+            return currency
         }
 
         fun calculateCorrespondingValues(
@@ -47,17 +67,6 @@ class CurrencyListUtils {
             return list
         }
 
-        fun generateListFromResponse(response: CurrenciesApiResponse): MutableList<Currency> {
-            val tempList = mutableListOf<Currency>()
-            val dataSet = response.rates.entries
-            val currency = Currency(response.base, BASE_RATE) // Base currency
-            tempList.add(currency)
-            dataSet.iterator().forEach { jsonEntry ->
-                val newCurrency = Currency(jsonEntry.key, jsonEntry.value)
-                tempList.add(newCurrency)
-            }
-            return tempList
-        }
 
         fun copyListItemsOrder(
             fromList: MutableList<Currency>,
@@ -75,5 +84,7 @@ class CurrencyListUtils {
             tempList.addAll(toList)
             return tempList
         }
+
+
     }
 }

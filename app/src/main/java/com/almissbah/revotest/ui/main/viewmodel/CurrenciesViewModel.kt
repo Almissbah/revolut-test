@@ -72,7 +72,7 @@ class CurrenciesViewModel : ViewModel() {
     private fun postResponse(response: CurrenciesApiResponse) {
         mCurrenciesList = buildOrderedCurrenciesList(response)
         if (mCurrenciesList.isNotEmpty()) {
-            mBaseCurrency = CurrencyListUtils.getValidateBaseCurrency(
+            mBaseCurrency = CurrencyListUtils.getValidBaseCurrency(
                 mBaseValue,
                 mBaseCurrency,
                 mCurrenciesList
