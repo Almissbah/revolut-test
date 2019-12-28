@@ -1,5 +1,7 @@
 package com.almissbah.revotest.data.remote.model
 
+import kotlin.math.roundToInt
+
 
 data class Currency(var name: String, var rate: Double) {
     var value: Double = 0.0
@@ -10,7 +12,7 @@ data class Currency(var name: String, var rate: Double) {
         }
 
     fun calculateValue(baseValue: Double) {
-        value = baseValue * rate
+        value = ((baseValue * rate) * 100).roundToInt() / 100.0
     }
 
     override fun equals(other: Any?): Boolean {

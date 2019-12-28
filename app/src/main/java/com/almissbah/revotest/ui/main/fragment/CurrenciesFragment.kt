@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.almissbah.revotest.R
 import com.almissbah.revotest.data.RevoRepository
 import com.almissbah.revotest.data.remote.model.Currency
+import com.almissbah.revotest.data.remote.model.Resource
 import com.almissbah.revotest.databinding.CurrenciesFragmentBinding
 import com.almissbah.revotest.ui.base.BaseFragment
 import com.almissbah.revotest.ui.main.adapter.CurrenciesAdapter
@@ -31,77 +32,101 @@ class CurrenciesFragment : BaseFragment() {
             CurrenciesFragment()
     }
 
-    private lateinit var binding: CurrenciesFragmentBinding
-    private lateinit var viewModel: CurrenciesViewModel
-    private lateinit var currenciesAdapter: CurrenciesAdapter
-    private var mCurrenciesList: MutableList<Currency> = mutableListOf()
-    private var focusedView: EditText? = null
+    private lateinit var mBinding: CurrenciesFragmentBinding
+    private lateinit var mViewModel: CurrenciesViewModel
+    private lateinit var mCurrenciesAdapter: CurrenciesAdapter
+    private var mBaseEditText: EditText? = null
     @Inject
-    lateinit var revoRepository: RevoRepository
+    lateinit var mRevoRepository: RevoRepository
 
     private val textWatcher = object : TextWatcher {
         override fun afterTextChanged(s: Editable?) {
-
         }
-
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
         }
-
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            viewModel.calculateValues(s.toString())
+            mViewModel.calculateValues(s.toString())
         }
-
     }
+
+    private val onClickListener = object : ItemClickListener {
+        override fun onClicked(view: EditText, currency: Currency, position: Int) {
+            if (currency != mCurrenciesAdapter.mBaseCurrency || mBaseEditText == null) {
+                mViewModel.moveItemToTop(position, currency)
+                updateBaseCurrency(currency)
+                focusAndShowKeyboard(view)
+            }
+        }
+    }
+    private val textChangeListener = object :
+        CurrenciesAdapter.TextChangeListener {
+        override fun onChange(view: EditText, currency: Currency, text: String) {
+            mViewModel.calculateValues(text)
+        }
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
 
-        binding = DataBindingUtil.inflate(
+        mBinding = DataBindingUtil.inflate(
             inflater, R.layout.currencies_fragment, container, false
         )
-        initCurrenciesView()
-        return binding.root
+        initRecyclerView()
+        mBinding.Retry.setOnClickListener {
+            mViewModel.subscribe()
+        }
+        return mBinding.root
     }
 
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(CurrenciesViewModel::class.java)
-        viewModel.revoRepository = this.revoRepository
-        subscribeToLiveData()
+        mViewModel = ViewModelProviders.of(this).get(CurrenciesViewModel::class.java)
+        mViewModel.mRevoRepository = this.mRevoRepository
 
-    }
-
-    override fun onDestroy() {
-        viewModel.unSubscribe()
-        super.onDestroy()
-    }
-
-    private fun initCurrenciesView() {
-        binding.rvCurrencies.layoutManager = LinearLayoutManager(this.context)
-        currenciesAdapter =
-            CurrenciesAdapter()
-        currenciesAdapter.itemClickListener = object : ItemClickListener {
-            override fun onClicked(view: EditText, currency: Currency, position: Int) {
-                if (currency != currenciesAdapter.baseCurrency || focusedView == null) {
-                    currenciesAdapter.baseCurrency = currency
-                    moveItemToTop(position, currency)
-                    viewModel.updateBaseCurrency(currency)
-                    focusAndShowKeyboard(view)
+        mViewModel.getCurrencies().observe(
+            this,
+            Observer { resource ->
+                when (resource.stats) {
+                    Resource.Status.SUCCESS -> {
+                        showRecyclerView()
+                        updateAdapter(resource.currencies!!)
+                    }
+                    Resource.Status.FAIL ->
+                        showError()
+                    Resource.Status.INIT ->
+                        showLoading()
+                    Resource.Status.LOADING ->
+                        showLoading()
                 }
+            })
+    }
 
-            }
-        }
+    override fun onResume() {
+        mViewModel.subscribe()
+        super.onResume()
+    }
 
-        currenciesAdapter.textChangeListener = object :
-            CurrenciesAdapter.TextChangeListener {
-            override fun onChange(view: EditText, currency: Currency, text: String) {
-                viewModel.calculateValues(text)
-            }
-        }
-        binding.rvCurrencies.adapter = currenciesAdapter
+    override fun onPause() {
+        mViewModel.unSubscribe()
+        super.onPause()
+    }
+
+
+    private fun initRecyclerView() {
+        mBinding.rvCurrencies.layoutManager = LinearLayoutManager(this.context)
+        mCurrenciesAdapter = CurrenciesAdapter()
+        mCurrenciesAdapter.mItemClickListener = onClickListener
+        mCurrenciesAdapter.mTextChangeListener = textChangeListener
+        mBinding.rvCurrencies.adapter = mCurrenciesAdapter
+    }
+
+    private fun updateBaseCurrency(currency: Currency) {
+        mCurrenciesAdapter.mBaseCurrency = currency
+        mViewModel.updateBaseCurrency(currency)
     }
 
     private fun focusAndShowKeyboard(view: EditText) {
@@ -119,61 +144,45 @@ class CurrenciesFragment : BaseFragment() {
     private fun setFocusToView(view: EditText) {
         view.requestFocus()
         view.addTextChangedListener(textWatcher)
-        focusedView = view
+        mBaseEditText = view
     }
 
     private fun clearFocusedView() {
-        if (focusedView != null) {
-            focusedView!!.removeTextChangedListener(textWatcher)
-            focusedView!!.clearFocus()
+        mBaseEditText?.removeTextChangedListener(textWatcher)
+        mBaseEditText?.clearFocus()
+    }
+
+
+    private fun showLoading() {
+        if (mBinding.rvCurrencies.visibility == View.INVISIBLE) {
+            mBinding.progressBar.visibility = View.VISIBLE
+            mBinding.ErrorMsg.visibility = View.INVISIBLE
+            mBinding.Retry.visibility = View.INVISIBLE
         }
     }
 
+    private fun showError() {
+        mBinding.rvCurrencies.visibility = View.INVISIBLE
+        mBinding.progressBar.visibility = View.INVISIBLE
+        mBinding.ErrorMsg.visibility = View.VISIBLE
+        mBinding.Retry.visibility = View.VISIBLE
+        mViewModel.unSubscribe()
 
-    fun moveItemToTop(
-        from: Int,
-        currency: Currency
-    ) {
-        mCurrenciesList.removeAt(from)
-        mCurrenciesList.add(0, currency)
-        currenciesAdapter.setData(mCurrenciesList)
+    }
+
+    private fun showRecyclerView() {
+        mBinding.progressBar.visibility = View.INVISIBLE
+        mBinding.rvCurrencies.visibility = View.VISIBLE
+        mBinding.ErrorMsg.visibility = View.INVISIBLE
+        mBinding.Retry.visibility = View.INVISIBLE
     }
 
 
-    private fun subscribeToLiveData() {
-        viewModel.subscribe().observe(
-            this,
-            Observer { currencies ->
-                val tempList = arrangeList(currencies)
-                updateAdapter(tempList)
-
-            })
+    private fun updateAdapter(newCurrencies: MutableList<Currency>) {
+        if (mCurrenciesAdapter.mBaseCurrency == null) mCurrenciesAdapter.mBaseCurrency =
+            newCurrencies[0]
+        mCurrenciesAdapter.setData(newCurrencies)
+        mBinding.rvCurrencies.setItemViewCacheSize(newCurrencies.size)
     }
-
-    private fun arrangeList(currencies: MutableList<Currency>): MutableList<Currency> {
-        val tempList = mutableListOf<Currency>()
-        if (mCurrenciesList.size > 0) mCurrenciesList.forEach { currency ->
-            val item: Currency? =
-                currencies.find { t -> t.name == currency.name }
-            if (item != null) {
-                tempList.add(item)
-                currencies.remove(item)
-            }
-        }
-        tempList.addAll(currencies)
-        return tempList
-    }
-
-    private fun updateAdapter(list: MutableList<Currency>) {
-        mCurrenciesList.clear()
-        mCurrenciesList.addAll(list)
-
-        currenciesAdapter.setData(list)
-        binding.rvCurrencies.setItemViewCacheSize(list.size)
-
-        if (currenciesAdapter.baseCurrency == null) currenciesAdapter.baseCurrency =
-            list[0]
-    }
-
 
 }

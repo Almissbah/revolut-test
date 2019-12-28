@@ -12,12 +12,13 @@ import io.reactivex.schedulers.Schedulers
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Singleton
 
 @Module
 object ApiModule {
 
     @Provides
-    @Reusable
+    @Singleton
     @JvmStatic
     internal fun provideGson(): Gson {
         val gsonBuilder = GsonBuilder()
@@ -25,7 +26,7 @@ object ApiModule {
     }
 
     @Provides
-    @Reusable
+    @Singleton
     @JvmStatic
     internal fun provideRetrofitInterface(gson: Gson): Retrofit {
         return Retrofit.Builder()
@@ -36,7 +37,7 @@ object ApiModule {
     }
 
     @Provides
-    @Reusable
+    @Singleton
     @JvmStatic
     internal fun provideApiService(retrofit: Retrofit): CurrenciesApiService {
         return retrofit.create(CurrenciesApiService::class.java)
@@ -44,7 +45,7 @@ object ApiModule {
 
 
     @Provides
-    @Reusable
+    @Singleton
     @JvmStatic
     internal fun provideRepository(currenciesApiService: CurrenciesApiService): RevoRepository {
         return RevoRepository(currenciesApiService)

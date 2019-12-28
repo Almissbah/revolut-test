@@ -19,15 +19,14 @@ import com.almissbah.revotest.utils.DiffUtilsCallback
 class CurrenciesAdapter :
     RecyclerView.Adapter<CurrenciesAdapter.CurrencyViewHolder>() {
 
-    private var currenciesList: MutableList<Currency> = mutableListOf()
-    var baseCurrency: Currency? = null
-    lateinit var itemClickListener: ItemClickListener
-    lateinit var textChangeListener: TextChangeListener
+    private var mCurrencies: MutableList<Currency> = mutableListOf()
+    var mBaseCurrency: Currency? = null
+    lateinit var mItemClickListener: ItemClickListener
+    lateinit var mTextChangeListener: TextChangeListener
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): CurrencyViewHolder {
         val context: Context = viewGroup.context
         val layoutInflater = LayoutInflater.from(context)
-
         val binding: CurrenciesListItemBinding =
             DataBindingUtil.inflate(layoutInflater, R.layout.currencies_list_item, viewGroup, false)
 
@@ -38,7 +37,7 @@ class CurrenciesAdapter :
 
 
     override fun getItemCount(): Int {
-        return currenciesList.size
+        return mCurrencies.size
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -58,14 +57,15 @@ class CurrenciesAdapter :
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onBindViewHolder(holder: CurrencyViewHolder, position: Int) {
-        val currency: Currency = currenciesList[holder.adapterPosition]
+        val currency: Currency = mCurrencies[holder.adapterPosition]
         holder.binding.currency = currency
-        holder.binding.value.setOnTouchListener { v, event ->
+
+        holder.binding.value.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_UP -> {
-                    itemClickListener.onClicked(
+                    mItemClickListener.onClicked(
                         holder.binding.value,
-                        currenciesList[holder.adapterPosition],
+                        mCurrencies[holder.adapterPosition],
                         holder.adapterPosition
                     )
                 }
@@ -74,9 +74,9 @@ class CurrenciesAdapter :
         }
 
         holder.itemView.setOnClickListener {
-            itemClickListener.onClicked(
+            mItemClickListener.onClicked(
                 holder.binding.value,
-                currenciesList[holder.adapterPosition],
+                mCurrencies[holder.adapterPosition],
                 holder.adapterPosition
             )
         }
@@ -84,17 +84,16 @@ class CurrenciesAdapter :
 
 
     fun setData(newCurrencies: MutableList<Currency>) {
-        val diffCallback = DiffUtilsCallback(currenciesList, newCurrencies)
+        val diffCallback = DiffUtilsCallback(mCurrencies, newCurrencies)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
-        currenciesList = newCurrencies
+        mCurrencies = newCurrencies
         diffResult.dispatchUpdatesTo(this)
     }
 
     private fun updateItemView(holder: CurrencyViewHolder, position: Int, currency: Currency) {
-        currenciesList[position].value = currency.value
-        currenciesList[position].rate = currency.rate
+        mCurrencies[position] = currency
         holder.binding.currencyName.text = currency.name
-        if (baseCurrency != currency)
+        if ((mBaseCurrency != null && mBaseCurrency != currency) || mBaseCurrency == null)
             holder.binding.value.setText(currency.value.toString())
     }
 
