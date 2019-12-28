@@ -4,7 +4,7 @@ one screen test app for revolut interview, the screen has a list of currencies f
 
 ## App Features
 1. The app lists the currencie, Each in a row and updates them every 1 sec.
-1. User can tap on currency row and it slides to top and its input becomes first responder.
+1. User can tap on currency row and it slides to top and its input becomes the first responder.
 2. User can change the amount and the app simultaneously updates the corresponding value for other currencies.
 
 ## App architecture
