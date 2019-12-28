@@ -10,7 +10,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import com.almissbah.revotest.data.remote.model.Currency
 import com.almissbah.revotest.data.remote.model.Resource
-import com.almissbah.revotest.utils.BASE_RATE
+import com.almissbah.revotest.utils.CurrencyListUtils
 import com.almissbah.revotest.utils.INITIAL_DELAY
 import com.almissbah.revotest.utils.REFRESH_PERIOD
 import java.util.concurrent.TimeUnit
@@ -33,10 +33,11 @@ class CurrenciesViewModel : ViewModel() {
     fun getCurrencies(): MutableLiveData<Resource> {
         return mCurrenciesLiveData
     }
+
     private fun buildSubscription(): Disposable {
         return Observable.interval(INITIAL_DELAY, REFRESH_PERIOD, TimeUnit.SECONDS, Schedulers.io())
             .observeOn(Schedulers.io())
-            .map { mRevoRepository.refreshCurrencies() }.subscribe {
+            .map { mRevoRepository.getCurrencies() }.subscribe {
                 it.subscribe(object : CallbackWrapper<CurrenciesApiResponse>() {
                     override fun onStart() {
                         postLoading()
@@ -51,9 +52,10 @@ class CurrenciesViewModel : ViewModel() {
                         mStatus = Resource.Status.FAIL
                         postError()
                     }
+
                     override fun onSuccess(t: CurrenciesApiResponse) {
                         mStatus = Resource.Status.SUCCESS
-                        parseResponse(t)
+                        postResponse(t)
                     }
                 })
             }
@@ -67,39 +69,27 @@ class CurrenciesViewModel : ViewModel() {
         mCurrenciesLiveData.postValue(Resource(Resource.Status.LOADING, null))
     }
 
-    private fun parseResponse(responseCurrencies: CurrenciesApiResponse) {
-        mCurrenciesList = buildCurrenciesList(responseCurrencies)
-        validateBaseCurrency()
-        calculateValues(mUserInput)
-    }
-
-    private fun buildCurrenciesList(responseCurrencies: CurrenciesApiResponse): MutableList<Currency> {
-        val tempList = mutableListOf<Currency>()
-        val dataSet = responseCurrencies.rates.entries
-        val currency = Currency(responseCurrencies.base, BASE_RATE) // Base currency
-        tempList.add(currency)
-        dataSet.iterator().forEach { jsonEntry ->
-            val newCurrency = Currency(jsonEntry.key, jsonEntry.value)
-            tempList.add(newCurrency)
-        }
-        return arrangeCurrencies(tempList)
-    }
-
-    private fun validateBaseCurrency() {
-        if (mBaseCurrency == null) {
-            mCurrenciesList[0].calculateValue(mBaseValue)
-            mBaseCurrency = mCurrenciesList[0]
+    private fun postResponse(response: CurrenciesApiResponse) {
+        mCurrenciesList = buildOrderedCurrenciesList(response)
+        if (mCurrenciesList.isNotEmpty()) {
+            mBaseCurrency = CurrencyListUtils.getValidateBaseCurrency(
+                mBaseValue,
+                mBaseCurrency,
+                mCurrenciesList
+            )
+            calculateValues(mUserInput)
         } else {
-            mBaseCurrency = mCurrenciesList.find { it.name == mBaseCurrency!!.name }
-            if (mBaseCurrency == null) {
-                mCurrenciesList[0].calculateValue(mBaseValue)
-                mBaseCurrency = mCurrenciesList[0]
-            }
+            mCurrenciesLiveData.postValue(Resource(Resource.Status.SUCCESS, mCurrenciesList))
         }
     }
 
+    private fun buildOrderedCurrenciesList(response: CurrenciesApiResponse): MutableList<Currency> {
+        val tempList = CurrencyListUtils.generateListFromResponse(response)
+        return CurrencyListUtils.copyListItemsOrder(fromList = mCurrenciesList, toList = tempList)
+    }
 
-    fun updateBaseCurrency(currency: Currency) {
+
+    fun setBaseCurrency(currency: Currency) {
         mBaseCurrency = currency
         mUserInput = currency.value
         calculateValues(mUserInput)
@@ -107,25 +97,15 @@ class CurrenciesViewModel : ViewModel() {
 
     private fun calculateValues(value: Double) {
         mUserInput = value
-        mBaseValue = mUserInput / if (mBaseCurrency != null) mBaseCurrency!!.rate else 1.0
-        val list = mutableListOf<Currency>()
-        mCurrenciesList.forEach {
-            val currency = Currency(it.name, it.rate)
-            currency.calculateValue(mBaseValue)
-            list.add(currency)
-        }
+        mBaseValue = CurrencyListUtils.calculateBaseValue(mUserInput, mBaseCurrency)
+        val list = CurrencyListUtils.calculateCorrespondingValues(mBaseValue, mCurrenciesList)
         mCurrenciesLiveData.postValue(Resource(mStatus, list))
     }
 
     fun calculateValues(text: String) {
-        calculateValues(toValidDouble(text))
+        calculateValues(CurrencyListUtils.toValidDouble(text))
     }
 
-    private fun toValidDouble(text: String): Double {
-        var value = 0.0
-        if (text != "" && text != ".") value = java.lang.Double.parseDouble(text)
-        return value
-    }
 
     fun moveItemToTop(
         from: Int,
@@ -136,19 +116,6 @@ class CurrenciesViewModel : ViewModel() {
         mCurrenciesLiveData.postValue(Resource(Resource.Status.SUCCESS, mCurrenciesList))
     }
 
-    private fun arrangeCurrencies(currencies: MutableList<Currency>): MutableList<Currency> {
-        val tempList = mutableListOf<Currency>()
-        if (mCurrenciesList.size > 0) mCurrenciesList.forEach { currency ->
-            val item: Currency? =
-                currencies.find { t -> t.name == currency.name }
-            if (item != null) {
-                tempList.add(item)
-                currencies.remove(item)
-            }
-        }
-        tempList.addAll(currencies)
-        return tempList
-    }
 
     fun unSubscribe() {
         mSubscription?.dispose()

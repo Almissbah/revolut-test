@@ -1,12 +1,10 @@
 package com.almissbah.revotest.ui.main.adapter
 
 import android.content.Context
-import android.os.Build
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.EditText
-import androidx.annotation.RequiresApi
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -35,12 +33,10 @@ class CurrenciesAdapter :
         )
     }
 
-
     override fun getItemCount(): Int {
         return mCurrencies.size
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onBindViewHolder(
         holder: CurrencyViewHolder,
         position: Int,
@@ -55,7 +51,6 @@ class CurrenciesAdapter :
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onBindViewHolder(holder: CurrencyViewHolder, position: Int) {
         val currency: Currency = mCurrencies[holder.adapterPosition]
         holder.binding.currency = currency

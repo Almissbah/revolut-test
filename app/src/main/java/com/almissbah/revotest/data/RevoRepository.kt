@@ -8,7 +8,7 @@ import javax.inject.Singleton
 @Singleton
 class RevoRepository(private val currenciesApiService: CurrenciesApiService) {
 
-    fun refreshCurrencies(): Observable<CurrenciesApiResponse> {
+    fun getCurrencies(): Observable<CurrenciesApiResponse> {
         return currenciesApiService.getCurrencies()
     }
 }

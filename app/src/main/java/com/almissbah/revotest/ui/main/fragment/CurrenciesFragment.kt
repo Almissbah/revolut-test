@@ -42,8 +42,10 @@ class CurrenciesFragment : BaseFragment() {
     private val textWatcher = object : TextWatcher {
         override fun afterTextChanged(s: Editable?) {
         }
+
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
         }
+
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
             mViewModel.calculateValues(s.toString())
         }
@@ -53,8 +55,8 @@ class CurrenciesFragment : BaseFragment() {
         override fun onClicked(view: EditText, currency: Currency, position: Int) {
             if (currency != mCurrenciesAdapter.mBaseCurrency || mBaseEditText == null) {
                 mViewModel.moveItemToTop(position, currency)
-                updateBaseCurrency(currency)
-                focusAndShowKeyboard(view)
+                setBaseCurrency(currency)
+                setFocusAndShowKeyboard(view)
             }
         }
     }
@@ -115,6 +117,10 @@ class CurrenciesFragment : BaseFragment() {
         super.onPause()
     }
 
+    override fun onDestroy() {
+        mViewModel.unSubscribe()
+        super.onDestroy()
+    }
 
     private fun initRecyclerView() {
         mBinding.rvCurrencies.layoutManager = LinearLayoutManager(this.context)
@@ -124,12 +130,12 @@ class CurrenciesFragment : BaseFragment() {
         mBinding.rvCurrencies.adapter = mCurrenciesAdapter
     }
 
-    private fun updateBaseCurrency(currency: Currency) {
+    private fun setBaseCurrency(currency: Currency) {
         mCurrenciesAdapter.mBaseCurrency = currency
-        mViewModel.updateBaseCurrency(currency)
+        mViewModel.setBaseCurrency(currency)
     }
 
-    private fun focusAndShowKeyboard(view: EditText) {
+    private fun setFocusAndShowKeyboard(view: EditText) {
         clearFocusedView()
         setFocusToView(view)
         showKeyboard(view)
