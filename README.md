@@ -12,21 +12,20 @@ Based on mvvm architecture and repository pattern.
 
 ### The app includes the following main components:
  
-* A web api service.
-* A repository that works with the api service to provide a unified data interface.
-* A ViewModel that provides data specific for the UI using RxJava and LiveData.
+* A web API service.
+* A repository that works with the API service to provide a unified data interface.
+* A utils class to handle currencies operatoins.
+* A ViewModel that provides data specific for the UI using CurrencyListUtils, RxJava and LiveData.
 * The UI, which shows a visual representation of the data in the ViewModel.
 
 ### App Packages:
 * **data** - contains:
   * **RevoRepository** -  app repository class for handling data.
-  * **remote** - contains the api classes needed for making calls to Revolut server, using Retrofit.
+  * **remote** - contains classes needed for making API calls to Revolut server, using Retrofit.
 * **di** - contains dependency injection classes, using Dagger2.
 * **ui** - contains classes needed to display Activity and Fragment.
-* **util** - contains app constants, diffUtilsCallback for recycler view optimization and CurrencyListUtils for viewModel operations.
+* **utils** - contains app constants, diffUtilsCallback for recycler view optimization and CurrencyListUtils for viewModel operations.
 
-### Notes 
-* CurrencyListUtils is the only class that has Junit tests is and Kotlin Docs.
 
 ### App Specs
 * Minimum SDK 21.
@@ -39,3 +38,5 @@ Based on mvvm architecture and repository pattern.
 * Gson for serialisation.
 * Junit 4 for testing.
 
+### Notes 
+* CurrencyListUtils is the only class that has Junit tests and Kotlin Docs.
