@@ -1,5 +1,5 @@
 # Revolut Test
-  Test app with one screen for revolut interview, the screen has a list of currencies fetched from the endpoint every 1 sec.
+ One screen Test app for revolut interview, The screen has a list of currencies fetched from the endpoint every 1 sec.
 
 
 ## App Features
@@ -23,11 +23,13 @@ Based on mvvm architecture and repository pattern.
   * **remote** - contains the api classes needed for making calls to Revolut server, using Retrofit.
 * **di** - contains dependency injection classes, using Dagger2.
 * **ui** - contains classes needed to display Activity and Fragment.
-* **util** - contains app constants and diffUtilsCallback for recycler view optimization.
+* **util** - contains app constants, diffUtilsCallback for recycler view optimization and CurrencyListUtils for viewModel operations.
 
+### Notes 
+* CurrencyListUtils is the only class that has Junit tests is and Kotlin Docs.
 
 ### App Specs
-* Minimum SDK 19.
+* Minimum SDK 21.
 * Kotlin.
 * MVVM Architecture.
 * Android Architecture Components (LiveData, Lifecycle, ViewModel, ConstraintLayout)
@@ -35,4 +37,5 @@ Based on mvvm architecture and repository pattern.
 * RxJava for making API calls every x sec.
 * Retrofit 2 for API integration.
 * Gson for serialisation.
+* Junit 4 for testing.
 
