@@ -1,5 +1,5 @@
 # Revolut Test
- One screen Test app for revolut interview, The screen has a list of currencies fetched from the endpoint every 1 sec.
+ One screen Test app, The screen has a list of currencies fetched from the endpoint every 1 sec.
 
 
 ## App Features
